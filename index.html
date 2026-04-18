@@ -4,8 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>マルチストラテジー・クオンツポートフォリオの設計と実装</title>
-<script src="https://cdn.jsdelivr.net/npm/markdown-it@14/dist/markdown-it.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/markdown-it-cjk-friendly@1/dist/markdown-it-cjk-friendly.min.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "markdown-it": "https://esm.sh/markdown-it@14",
+    "markdown-it-cjk-friendly": "https://esm.sh/markdown-it-cjk-friendly@1"
+  }
+}
+</script>
 <style>
 :root {
   --bg: #1a1a2e;
@@ -200,12 +206,15 @@ body {
   <div id="loading">Loading...</div>
 </main>
 
-<script>
-const md = window.markdownit({
+<script type="module">
+import MarkdownIt from 'markdown-it';
+import cjkFriendly from 'markdown-it-cjk-friendly';
+
+const md = new MarkdownIt({
   html: true,
   linkify: true,
   typographer: true
-}).use(window.markdownitCjkFriendly);
+}).use(cjkFriendly);
 
 const content = document.getElementById('content');
 const links = document.querySelectorAll('#sidebar a[data-file]');
