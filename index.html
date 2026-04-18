@@ -4,11 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>マルチストラテジー・クオンツポートフォリオの設計と実装</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script type="importmap">
 {
   "imports": {
     "markdown-it": "https://esm.sh/markdown-it@14",
-    "markdown-it-cjk-friendly": "https://esm.sh/markdown-it-cjk-friendly@1"
+    "markdown-it-cjk-friendly": "https://esm.sh/markdown-it-cjk-friendly@1",
+    "katex": "https://esm.sh/katex@0.16.11",
+    "katex/contrib/auto-render": "https://esm.sh/katex@0.16.11/contrib/auto-render"
   }
 }
 </script>
@@ -209,12 +212,23 @@ body {
 <script type="module">
 import MarkdownIt from 'markdown-it';
 import cjkFriendly from 'markdown-it-cjk-friendly';
+import renderMathInElement from 'katex/contrib/auto-render';
 
 const md = new MarkdownIt({
   html: true,
   linkify: true,
   typographer: true
 }).use(cjkFriendly);
+
+const katexOpts = {
+  delimiters: [
+    { left: '$$', right: '$$', display: true },
+    { left: '$', right: '$', display: false },
+    { left: '\\(', right: '\\)', display: false },
+    { left: '\\[', right: '\\]', display: true }
+  ],
+  throwOnError: false
+};
 
 const content = document.getElementById('content');
 const links = document.querySelectorAll('#sidebar a[data-file]');
@@ -226,6 +240,7 @@ async function loadChapter(file) {
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const text = await resp.text();
     content.innerHTML = md.render(text);
+    renderMathInElement(content, katexOpts);
     window.scrollTo(0, 0);
     // Update active link
     links.forEach(a => a.classList.remove('active'));
