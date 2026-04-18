@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>マルチストラテジー・クオンツポートフォリオの設計と実装</title>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it@14/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-cjk-friendly@1/dist/markdown-it-cjk-friendly.min.js"></script>
+<style>
+:root {
+  --bg: #1a1a2e;
+  --bg-sidebar: #16213e;
+  --bg-content: #0f3460;
+  --text: #e0e0e0;
+  --text-dim: #a0a0b0;
+  --accent: #e94560;
+  --accent2: #53a8b6;
+  --link: #7ec8e3;
+  --code-bg: #0a0a1a;
+  --border: #2a2a4a;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+  line-height: 1.8;
+}
+#sidebar {
+  width: 320px;
+  min-width: 320px;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 20px 0;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+}
+#sidebar h1 {
+  font-size: 16px;
+  padding: 10px 20px;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+#sidebar .part-title {
+  font-size: 12px;
+  color: var(--accent2);
+  padding: 12px 20px 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+#sidebar a {
+  display: block;
+  padding: 6px 20px 6px 30px;
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 13px;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+}
+#sidebar a:hover {
+  background: rgba(233, 69, 96, 0.1);
+  color: var(--text);
+  border-left-color: var(--accent);
+}
+#sidebar a.active {
+  background: rgba(233, 69, 96, 0.15);
+  color: var(--accent);
+  border-left-color: var(--accent);
+  font-weight: bold;
+}
+#content {
+  margin-left: 320px;
+  flex: 1;
+  padding: 40px 60px;
+  max-width: 900px;
+}
+#content h1 { color: var(--accent); font-size: 28px; margin: 30px 0 15px; border-bottom: 2px solid var(--accent); padding-bottom: 8px; }
+#content h2 { color: var(--accent2); font-size: 22px; margin: 25px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+#content h3 { color: var(--link); font-size: 18px; margin: 20px 0 8px; }
+#content p { margin: 10px 0; }
+#content code {
+  background: var(--code-bg);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 14px;
+}
+#content pre {
+  background: var(--code-bg);
+  padding: 15px 20px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 12px 0;
+  border: 1px solid var(--border);
+}
+#content pre code { padding: 0; background: none; }
+#content table {
+  border-collapse: collapse;
+  margin: 12px 0;
+  width: 100%;
+  font-size: 14px;
+}
+#content th, #content td {
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  text-align: left;
+}
+#content th { background: var(--bg-sidebar); color: var(--accent2); }
+#content tr:hover { background: rgba(255,255,255,0.03); }
+#content blockquote {
+  border-left: 4px solid var(--accent);
+  padding: 10px 20px;
+  margin: 12px 0;
+  background: rgba(233, 69, 96, 0.05);
+  color: var(--text-dim);
+}
+#content strong { color: var(--accent); }
+#content em { color: var(--accent2); }
+#content a { color: var(--link); }
+#content hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+#loading { text-align: center; padding: 100px; color: var(--text-dim); }
+#mobile-toggle {
+  display: none;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 20;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+@media (max-width: 900px) {
+  #sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+  #sidebar.open { transform: translateX(0); }
+  #content { margin-left: 0; padding: 20px; }
+  #mobile-toggle { display: block; }
+}
+</style>
+</head>
+<body>
+
+<button id="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+
+<nav id="sidebar">
+  <h1>📊 Multi-Strategy Quant Portfolio</h1>
+
+  <div class="part-title">Part I: 基礎理論</div>
+  <a href="#" data-file="ch01_multi_strategy.md">Ch1: マルチストラテジーとは</a>
+  <a href="#" data-file="ch02_portfolio_theory.md">Ch2: 相関とポートフォリオ理論</a>
+  <a href="#" data-file="ch03_sharpe_ratio.md">Ch3: Sharpe Ratio の落とし穴</a>
+  <a href="#" data-file="ch04_backtest_pitfalls.md">Ch4: バックテストの罠</a>
+
+  <div class="part-title">Part II: Alpha Source (17 Components)</div>
+  <a href="#" data-file="ch05_mr_mean_reversion.md">Ch5: MR — Mean Reversion</a>
+  <a href="#" data-file="ch06_gtaa.md">Ch6: GTAA — Tactical Allocation</a>
+  <a href="#" data-file="ch07_lv_low_volatility.md">Ch7: LV — Low Volatility</a>
+  <a href="#" data-file="ch08_im_idiosyncratic_momentum.md">Ch8-9: IM + MV</a>
+  <a href="#" data-file="ch10_vc_vix_contango.md">Ch10: VC — VIX Contango 🔥</a>
+  <a href="#" data-file="ch11_iv_premium.md">Ch11: IV_PREM — Vol Premium 🔥</a>
+  <a href="#" data-file="ch12_rate_alpha_r3_removal.md">Ch12: Rate Alpha + R3 削除</a>
+  <a href="#" data-file="ch13_cta_pnl_averaging_bug.md">Ch13: CTA + PnL Averaging Bug 🔥</a>
+  <a href="#" data-file="ch14_15_mn_xle.md">Ch14-15: MN + XLE_T</a>
+  <a href="#" data-file="ch16_t4b_wavelet.md">Ch16: T4b — Wavelet</a>
+  <a href="#" data-file="ch17_jp_ls.md">Ch17: JP_LS — 日本株 10-Factor</a>
+  <a href="#" data-file="ch18_au_ls.md">Ch18: AU_LS — ASIC Short</a>
+
+  <div class="part-title">Part III: Overlay System</div>
+  <a href="#" data-file="ch19_22_overlay_system.md">Ch19-22: 4 Overlay Layers</a>
+  <a href="#" data-file="ch23_dd_control.md">Ch23: DD Control (Depth+Speed)</a>
+
+  <div class="part-title">Part IV: ポートフォリオ構築</div>
+  <a href="#" data-file="ch24_27_portfolio_construction.md">Ch24-27: Weighting / Validation</a>
+
+  <div class="part-title">Part V: 実装と運用</div>
+  <a href="#" data-file="ch28_30_implementation.md">Ch28-30: safe_backtest / monitor</a>
+
+  <div class="part-title">Part VI: ドキュメンタリー</div>
+  <a href="#" data-file="ch31_development_documentary.md">Ch31: v1→v35 の旅</a>
+  <a href="#" data-file="ch32_negative_results.md">Ch32: 失敗した戦略たち</a>
+  <a href="#" data-file="ch33_ai_collaboration.md">Ch33: AI 共同設計</a>
+
+  <div class="part-title">付録</div>
+  <a href="#" data-file="appendix.md">付録: 全データテーブル</a>
+  <a href="#" data-file="references.md">参考文献 (57 papers)</a>
+</nav>
+
+<main id="content">
+  <div id="loading">Loading...</div>
+</main>
+
+<script>
+const md = window.markdownit({
+  html: true,
+  linkify: true,
+  typographer: true
+}).use(window.markdownitCjkFriendly);
+
+const content = document.getElementById('content');
+const links = document.querySelectorAll('#sidebar a[data-file]');
+
+async function loadChapter(file) {
+  content.innerHTML = '<div id="loading">Loading...</div>';
+  try {
+    const resp = await fetch(file);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const text = await resp.text();
+    content.innerHTML = md.render(text);
+    window.scrollTo(0, 0);
+    // Update active link
+    links.forEach(a => a.classList.remove('active'));
+    document.querySelector(`a[data-file="${file}"]`)?.classList.add('active');
+    // Close mobile sidebar
+    document.getElementById('sidebar').classList.remove('open');
+  } catch (e) {
+    content.innerHTML = `<h1>Error</h1><p>${e.message}</p>`;
+  }
+}
+
+// Click handlers
+links.forEach(a => {
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    const file = a.dataset.file;
+    loadChapter(file);
+    history.pushState(null, '', `#${file}`);
+  });
+});
+
+// Handle back/forward
+window.addEventListener('popstate', () => {
+  const file = location.hash.slice(1) || 'ch01_multi_strategy.md';
+  loadChapter(file);
+});
+
+// Initial load
+const initial = location.hash.slice(1) || 'ch01_multi_strategy.md';
+loadChapter(initial);
+</script>
+
+</body>
+</html>
